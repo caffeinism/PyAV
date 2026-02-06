@@ -25,10 +25,11 @@ clean:
 
 fate-suite:
 	# Grab ALL of the samples from the ffmpeg site.
+	mkdir -p tests/assets/fate-suite/
 	rsync -vrltLW rsync://fate-suite.ffmpeg.org/fate-suite/ tests/assets/fate-suite/
 
 lint:
-	$(PIP) install -U ruff isort pillow numpy mypy==1.16.1 pytest
+	$(PIP) install -U ruff isort pillow numpy mypy==1.19.1 pytest
 	ruff format --check av examples tests setup.py
 	isort --check-only --diff av examples tests
 	mypy av tests

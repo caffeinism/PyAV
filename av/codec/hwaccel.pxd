@@ -19,3 +19,5 @@ cdef class HWAccel:
     cdef public bint allow_software_fallback
     cdef public dict options
     cdef public int flags
+    cdef str _output_format
+    cdef int _device_id

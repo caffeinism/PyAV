@@ -4,6 +4,7 @@ from typing import Literal, cast
 
 from .codec import Codec, CodecContext
 from .container import Container
+from .index import IndexEntries
 
 class Disposition(Flag):
     default = cast(int, ...)
@@ -32,6 +33,7 @@ class Stream:
     codec: Codec
     codec_context: CodecContext
     metadata: dict[str, str]
+    index_entries: IndexEntries
     id: int
     profiles: list[str]
     profile: str | None
@@ -59,3 +61,5 @@ class AttachmentStream(Stream):
     type: Literal["attachment"]
     @property
     def mimetype(self) -> str | None: ...
+    @property
+    def data(self) -> bytes: ...

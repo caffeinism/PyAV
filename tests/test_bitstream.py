@@ -17,7 +17,7 @@ def is_annexb(packet: Packet | bytes | None) -> bool:
     return data[:3] == b"\0\0\x01" or data[:4] == b"\0\0\0\x01"
 
 
-def test_filters_availible() -> None:
+def test_filters_available() -> None:
     assert "h264_mp4toannexb" in bitstream_filters_available
 
 
@@ -97,7 +97,7 @@ def test_filter_flush() -> None:
 
         container.seek(0)
         # Without flushing, we expect to get an error: "A non-NULL packet sent after an EOF."
-        with pytest.raises(ValueError):
+        with pytest.raises(av.ArgumentError):
             for p in container.demux(stream):
                 ctx.filter(p)
 

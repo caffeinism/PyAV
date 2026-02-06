@@ -1,10 +1,9 @@
 cdef extern from "libavfilter/avfilter.h" nogil:
-    cdef int   avfilter_version()
+    cdef int avfilter_version()
     cdef char* avfilter_configuration()
     cdef char* avfilter_license()
 
     cdef struct AVFilterPad:
-        # This struct is opaque.
         pass
 
     const char* avfilter_pad_get_name(const AVFilterPad *pads, int index)
@@ -61,6 +60,15 @@ cdef extern from "libavfilter/avfilter.h" nogil:
 
     # custom
     cdef set pyav_get_available_filters()
+
+    int avfilter_process_command(AVFilterContext *filter,
+                                 const char *cmd,
+                                 const char *arg,
+                                 char *res,
+                                 int res_len,
+                                 int flags)
+
+    cdef int AVFILTER_CMD_FLAG_FAST
 
 
 cdef extern from "libavfilter/buffersink.h" nogil:

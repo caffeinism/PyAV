@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 
 # Make sure this is sourced.
 if [[ "$0" == "${BASH_SOURCE[0]}" ]]; then
@@ -21,7 +21,7 @@ if [[ ! "$PYAV_LIBRARY" ]]; then
             return 1
         fi
     else
-        PYAV_LIBRARY=ffmpeg-8.0
+        PYAV_LIBRARY=ffmpeg-8.0.1
         echo "No \$PYAV_LIBRARY set; defaulting to $PYAV_LIBRARY"
     fi
 fi
@@ -77,7 +77,6 @@ print("{}{}.{}".format(platform.python_implementation().lower(), *sys.version_in
     fi
 
 fi
-
 
 # Just a flag so that we know this was supposedly run.
 export _PYAV_ACTIVATED=1

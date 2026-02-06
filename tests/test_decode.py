@@ -2,11 +2,14 @@ import functools
 import os
 import pathlib
 from fractions import Fraction
+from typing import cast
 
 import numpy as np
 import pytest
 
 import av
+from av.sidedata.encparams import VideoEncParams
+from av.subtitles.subtitle import SubtitleSet
 
 from .common import TestCase, fate_suite
 
@@ -69,11 +72,13 @@ class TestDecode(TestCase):
 
         packet_count = 0
         frame_count = 0
+        audio_frame: av.AudioFrame | None = None
 
         with av.open(path) as container:
             for packet in container.demux(audio=0):
                 for frame in packet.decode():
                     frame_count += 1
+                    audio_frame = frame
                 packet_count += 1
 
         assert packet_count == 1
@@ -106,9 +111,12 @@ class TestDecode(TestCase):
 
         assert stream.time_base == Fraction(1, 25)
 
+        video_frame: av.VideoFrame | None = None
+
         for packet in container.demux(stream):
             for frame in packet.decode():
-                assert not isinstance(frame, av.subtitles.subtitle.SubtitleSet)
+                video_frame = frame
+                assert not isinstance(frame, SubtitleSet)
                 assert packet.time_base == frame.time_base
                 assert stream.time_base == frame.time_base
                 return
@@ -137,6 +145,32 @@ class TestDecode(TestCase):
             if not frame.key_frame:
                 assert vectors is None
                 return
+
+    def test_decoded_video_enc_params(self) -> None:
+        container = av.open(fate_suite("h264/interlaced_crop.mp4"))
+        stream = container.streams.video[0]
+        stream.codec_context.options = {"export_side_data": "venc_params"}
+
+        for frame in container.decode(stream):
+            video_enc_params = cast(
+                VideoEncParams,
+                frame.side_data.get("VIDEO_ENC_PARAMS"),
+            )
+            assert video_enc_params is not None
+            assert video_enc_params.nb_blocks == 40 * 24
+
+            first_block = video_enc_params.block_params(0)
+            assert video_enc_params.qp + first_block.delta_qp == 29
+            return
+
+    def test_decoded_video_enc_params_no_flag(self) -> None:
+        container = av.open(fate_suite("h264/interlaced_crop.mp4"))
+        stream = container.streams.video[0]
+        # When no additional flag is given, there should be no side data with the video encoding params
+
+        for frame in container.decode(stream):
+            video_enc_params = frame.side_data.get("VIDEO_ENC_PARAMS")
+            assert video_enc_params is None
 
     def test_decode_video_corrupt(self) -> None:
         # write an empty file
